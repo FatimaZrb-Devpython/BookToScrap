@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 
 def get_all_categories (url):
     
+    url = 'https://books.toscrape.com/index.html'
+    
     categories = []
 
     response = requests.get(url)

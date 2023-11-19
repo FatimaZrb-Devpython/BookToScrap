@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 
 
-def get_one_book(link) : 
+def get_one_book() : 
     
     link = 'https://books.toscrape.com/catalogue/david-and-goliath-underdogs-misfits-and-the-art-of-battling-giants_146/index.html'
     
