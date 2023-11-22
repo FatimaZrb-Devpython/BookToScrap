@@ -27,8 +27,11 @@ def get_one_book() :
     images = soup.find("div", id='product_gallery')
     image = []
     img = images.find("img")
-    src = img.get('src')
-    image.append(src.strip())
+    item = img.get('src')
+    item = item.replace('../../','')
+    picture  = ('https://books.toscrape.com/' + item)
+    image.append(picture.strip())
+    print(picture)
 
     
 # Extraction de la balise table afin de récupérer les balises td qui correspondent à chaque éléments nécessaire
@@ -59,7 +62,7 @@ def get_one_book() :
     return title,description,image,upc,category,price_excl_tax,price_incl_tax,available,review
             
 
-    
+ 
 # Créer une tde pour les en-têtes
 # en_tete = ["title","description","upc","price_excl_tax","price_incl_tax","available","review","url"]
 # collect = get_one_book()
