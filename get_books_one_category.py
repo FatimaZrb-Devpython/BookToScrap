@@ -2,41 +2,49 @@ import requests
 from bs4 import BeautifulSoup
 # import csv
 
-def get_books_one_category ():
+def get_books_one_category (url):
     
-    url = 'https://books.toscrape.com/catalogue/category/books/default_15/'
+    url_split = url.split('/')
+    url_split_bis= url_split[0:len(url_split)-1]
+    path = '/'.join(url_split_bis)
+    
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
-    
     books = []
 
     row = soup.find("ol", class_='row').find_all('h3')
     for a in row :
         a =  a.find('a')
         link = a.get('href')
-        link = link.replace('../../..','')
-        books.append( url + link)
+        link = link.replace('../../../','')
+        books.append( path + '/' + link)
         
-        
-    next = soup.find('ul', class_= 'pager').find('li', class_='next')
-    while next != None :
-        current_url = ""
-        for a in next : 
-            a = next.find('a')
-            link_next = a.get('href')
-            current_url = url + link_next
-
-        response = requests.get(current_url)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        next_row = soup.find("ol", class_='row').find_all('h3')
-        for a in next_row :
-            a =  a.find('a')
-            link = a.get('href')
-            link = link.replace('../../..','')
-            books.append('https://books.toscrape.com/catalogue' + link)
+    try:
             
         next = soup.find('ul', class_= 'pager').find('li', class_='next')
+        while next != None :
+            current_url = ""
+            for a in next : 
+                a = next.find('a')
+                link_next = a.get('href')
+                current_url = path + '/' +  link_next
+                
+            response = requests.get(current_url)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            next_row = soup.find("ol", class_='row').find_all('h3')
+            for a in next_row :
+                a =  a.find('a')
+                link = a.get('href')
+                link = link.replace('../../../','')
+                books.append('https://books.toscrape.com/catalogue' + link)
+                
+            next = soup.find('ul', class_= 'pager').find('li', class_='next')
+    except: 
+        return books
+    
     return books
+
+
 
 # # Créer une liste pour les en-têtes
 # en_tete = ["list"]
