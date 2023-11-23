@@ -3,11 +3,12 @@ from bs4 import BeautifulSoup
 # import csv
 
 
-
-
-def get_one_book() : 
+def get_one_book(link) : 
     
-    link = 'https://books.toscrape.com/catalogue/david-and-goliath-underdogs-misfits-and-the-art-of-battling-giants_146/index.html'
+    link_split = link.split('/')
+    link_before= link_split[0:len(link_split)-5]
+    link_title = link_split[7:len(link_split)]
+    link = '/'.join(link_before + link_title)
     
     page = requests.get(link)
     soup = BeautifulSoup(page.content, 'html.parser')
@@ -31,7 +32,6 @@ def get_one_book() :
     item = item.replace('../../','')
     picture  = ('https://books.toscrape.com/' + item)
     image.append(picture.strip())
-    print(picture)
 
     
 # Extraction de la balise table afin de récupérer les balises td qui correspondent à chaque éléments nécessaire
@@ -66,15 +66,15 @@ def get_one_book() :
 # Créer une tde pour les en-têtes
 # en_tete = ["title","description","upc","price_excl_tax","price_incl_tax","available","review","url"]
 # collect = get_one_book()
-
-# # Créer un nouveau fichier pour écrire dans le fichier appelé « book.csv »
-# with open('book.csv', 'w') as csv_file:
-#         # Créer un objet writer (écriture) avec ce fichier
+# title,description,image,upc,price_excl_tax,price_incl_tax,available,review = collect
+# # Créer un nouveau fichier pour écrire dans le fichier appelé « one_book.csv »
+# with open('one_book.csv', 'w') as csv_file:
+#     # Créer un objet writer (écriture) avec ce fichier
 #     writer = csv.writer(csv_file, delimiter=',')
 #     writer.writerow(en_tete)
-#         # Parcourir les éléments- zip permet d'itérer sur deux tdes ou plus à la fois
-#     for title,description,upc,price_excl_tax,price_incl_tax,available,review,url in zip(collect()):
-#             # Créer une nouvelle ligne pour chaque éléments à ce moment de la boucle
-#         ligne = [title,description,upc,price_excl_tax,price_incl_tax,available,review,url] 
+#     # Parcourir les éléments- zip permet d'itérer sur deux tdes ou plus à la fois
+#     for title,description,image,upc,price_excl_tax,price_incl_tax,available,review in zip(collect):
+#         # Créer une nouvelle ligne pour chaque éléments à ce moment de la boucle
+#         ligne = [title,description,image,upc,price_excl_tax,price_incl_tax,available,review] 
 #         writer.writerow(ligne)
 
