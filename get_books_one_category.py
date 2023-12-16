@@ -1,23 +1,25 @@
 import requests
 from bs4 import BeautifulSoup
-# import csv
+import csv
+import os
 
-def get_books_one_category (url):
+def get_books_one_category (category):
     
+    url = category[3]
     url_split = url.split('/')
-    url_split_bis= url_split[0:len(url_split)-1]
-    path = '/'.join(url_split_bis)
+    path = '/'.join(url_split[:-1])
     
-    response = requests.get(url)
+    response = requests.get(url, timeout=(10, 30))
     soup = BeautifulSoup(response.content, 'html.parser')
+
     books = []
 
     row = soup.find("ol", class_='row').find_all('h3')
     for a in row :
         a =  a.find('a')
         link = a.get('href')
-        link = link.replace('../../../','')
-        books.append( path + '/' + link)
+        link = link.replace('../../','')
+        books.append( 'https://books.toscrape.com/catalogue'+ '/' + link)
         
     try:
             
@@ -35,8 +37,8 @@ def get_books_one_category (url):
             for a in next_row :
                 a =  a.find('a')
                 link = a.get('href')
-                link = link.replace('../../../','')
-                books.append('https://books.toscrape.com/catalogue' + link)
+                link = link.replace('../../','')
+                books.append('https://books.toscrape.com/catalogue' + '/' + link)
                 
             next = soup.find('ul', class_= 'pager').find('li', class_='next')
     except: 
@@ -45,18 +47,36 @@ def get_books_one_category (url):
     return books
 
 
+def save_books_category(books, category):
+    
+    if len(category) >= 1:
+        # Extraire le titre de la catégorie
+        category_title = category[1]
 
-# # Créer une liste pour les en-têtes
-# en_tete = ["list"]
+       # Construire le chemin du dossier de la catégorie
+        category_folder = fr'C:\Users\fatim\OneDrive\Bureau\formation 1\Projet_2_Books_Online/categories/{category_title}'
 
-# # Créer un nouveau fichier pour écrire dans le fichier appelé « category.csv »
-# with open('category.csv', 'w') as csv_file:
-#     # Créer un objet writer (écriture) avec ce fichier
-#     writer = csv.writer(csv_file, delimiter=',')
-#     writer.writerow(en_tete)
-#     # Parcourir les éléments- zip permet d'itérer sur deux listes ou plus à la fois
-#     for list in zip(list):
-#         # Créer une nouvelle ligne pour chaque éléments à ce moment de la boucle
-#         ligne = [list] 
-#         writer.writerow(ligne)
-        
+        # Créer le dossier de la catégorie s'il n'existe pas
+        os.makedirs(category_folder, exist_ok=True)
+
+        # Construire le chemin du fichier dans le dossier de la catégorie
+        file_path = os.path.join(category_folder, f'{category_title}.csv')
+
+        # Vérifier si le fichier existe déjà
+        file_exists = os.path.isfile(file_path)
+
+        # Créer un nouveau fichier pour écrire dans le fichier appelé « category_title.csv »
+        with open(file_path, 'w') as csv_file:
+            # Créer un objet writer (écriture) avec ce fichier
+            writer = csv.writer(csv_file, delimiter=',')
+
+            # Si le fichier n'existe pas, écrire les en-têtes
+            if not file_exists:
+                en_tete = [category_title]
+                writer.writerow(en_tete)
+
+            # Écrire chaque livre dans le fichier CSV correspondant à la catégorie
+            for book in books:
+                writer.writerow([book])
+                
+
