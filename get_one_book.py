@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import os
+import re
 # import urllib.request
 
 def get_one_book(book) : 
@@ -31,6 +32,7 @@ def get_one_book(book) :
     li= ul[2]
     category_book = li.a.get_text()
     category_book = ('category',category_book)
+
     
 # Extraction de la balise table afin de récupérer les balises td qui correspondent à chaque éléments nécessaire
 
@@ -55,46 +57,52 @@ def get_one_book(book) :
     review = ('review',review.string)
     
 
-    return title,description,picture,upc,category_book,price_excl_tax,price_incl_tax,available,review
+    return title,description,picture,category_book,upc,price_excl_tax,price_incl_tax,available,review
     
           
       
 
-def save_book(title, description, picture, upc, category_book, price_excl_tax, price_incl_tax, available, review, categories):
+def save_book(title,description,picture,category_book,upc,price_excl_tax,price_incl_tax,available,review,categories):
     
     try:
         # Recherche de la catégorie dans la liste complète des catégories
-        matching_categories = [category for category in categories if category[1] == category_book]
-        print(matching_categories)
-        if matching_categories:
-            # Extraire le titre de la catégorie
-            category_title = matching_categories[0][1]
-            print(category_title)
-            # Créer un nouveau fichier pour écrire dans le dossier de la catégorie
-            title = title.replace(" ", "_") + '.csv'
-            file_path = fr'C:\Users\fatim\OneDrive\Bureau\formation 1\Projet_2_Books_Online/categories/{category_title}/{title}'
-
-
-            # Vérifier si le fichier existe déjà
-            file_exists = os.path.isfile(file_path)
-
-            # Créer un nouveau fichier pour écrire dans le fichier
-            with open(file_path + '.csv', 'a', newline='') as csv_file:
-                # Créer un objet writer (écriture) avec ce fichier
-                writer = csv.writer(csv_file, delimiter=',')
-
-                # Si le fichier n'existe pas, écrire les en-têtes
-                if not file_exists:
-                    en_tete = ["title", "description", "picture", "upc", "category_book", "price_excl_tax", "price_incl_tax", "available", "review"]
-                    writer.writerow(en_tete)
-
-                # Créer une nouvelle ligne pour chaque élément
-                ligne = [title, description, picture, upc, category_book, price_excl_tax, price_incl_tax, available, review]
-                writer.writerow(ligne)
+        for category in categories :
+            
+            category = re.sub(r'[_0-9]', '', category[1])
+            category = category.replace('-',' ')
+            book = category_book[1]
+            book = book.lower()
+            
+            matching_category = category == book
+            
+            if matching_category:
                 
-    except Exception as error:
-        print("An error occurred while saving book:", type(error).__name__)
+                category_title = category
+                # Créer un nouveau fichier pour écrire dans le dossier de la catégorie
+                title = title.replace(" ", "_") + '.csv'
 
+                file_path = fr'C:\Users\fatim\OneDrive\Bureau\formation 1\Projet_2_Books_Online/categories/{category_title}/{title}.csv'
+
+                # Vérifier si le fichier existe déjà
+                file_exists = os.path.isfile(file_path)
+
+                # Créer un nouveau fichier pour écrire dans le fichier
+                with open(file_path , 'a', newline='') as csv_file:
+                    # Créer un objet writer (écriture) avec ce fichier
+                    writer = csv.writer(csv_file, delimiter=',')
+
+                    # Si le fichier n'existe pas, écrire les en-têtes
+                    if not file_exists:
+                        en_tete = ["title", "description", "picture", "category_book","upc", "price_excl_tax", "price_incl_tax", "available", "review"]
+                        writer.writerow(en_tete)
+
+                    # Créer une nouvelle ligne pour chaque élément
+                    ligne = [title,description,picture,category_book,upc,price_excl_tax,price_incl_tax,available,review]
+                    writer.writerow(ligne)
+                    
+    except Exception as error:
+        with open('error_log.txt', 'a') as log_file:
+            log_file.write(f"An error occurred: {type(error).__name__}\n")
 
 # # def get_picture (title,picture):
 # #     print(title,picture)
