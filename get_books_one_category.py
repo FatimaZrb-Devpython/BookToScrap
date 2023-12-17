@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import os
+import re
+
 
 def get_books_one_category (category):
     
@@ -47,11 +49,16 @@ def get_books_one_category (category):
     return books
 
 
+
 def save_books_category(books, category):
     
+
     if len(category) >= 1:
         # Extraire le titre de la catégorie
-        category_title = category[1]
+        category= category[1]
+        
+        category_title = re.sub(r'[_0-9]', '', category)
+        category_title = category_title.replace('-',' ')
 
        # Construire le chemin du dossier de la catégorie
         category_folder = fr'C:\Users\fatim\OneDrive\Bureau\formation 1\Projet_2_Books_Online/categories/{category_title}'
