@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
+import re
 
 def get_all_categories (url):
     
@@ -9,14 +10,16 @@ def get_all_categories (url):
     response = requests.get(url, timeout=(10, 30))
     soup = BeautifulSoup(response.content, 'html.parser')
         
-    list = soup.find("ul", class_='nav nav-list').find_all('li')
+    list = soup.find("ul", class_='nav nav-list').find_all('li')[1:]
     for a in list :
         a =  a.find('a')
         link = a.get('href')
         url_book = ('https://books.toscrape.com/' + link)
         split = url_book.split('/')
         title_category = split[6]
-        categories.append(('title : ',title_category, 'url :',url_book))
+        title = re.sub(r'[_0-9]', '', title_category)
+        title = title.replace('-',' ')
+        categories.append((title,url_book))
         
     return categories 
 
