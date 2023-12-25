@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 import os
 import re
-# import urllib.request
+import urllib.request
 
 def get_one_book(book) : 
     
@@ -13,12 +13,13 @@ def get_one_book(book) :
 
 # Extraction du titre dans le DOM
     title = soup.find("h1").string
+    
 
 #Extraction de toutes les balises p dans le DOM afin d'obtenir la balise p arrivant en 3eme position pour récupérer la description
 
     paragraph = soup.find_all('p')
     description = paragraph[3]
-    description = ('description : ',description.string)
+    description = (description.string)
 
 
 #Extraction de l'url de l'image du livre
@@ -28,10 +29,11 @@ def get_one_book(book) :
     item = item.replace('../../','')
     picture  = ('https://books.toscrape.com/' + item)
     
+    
     ul = soup.find("ul", class_='breadcrumb').findAll("li")   # De quel catégorie est le produit
     li= ul[2]
     category_book = li.a.get_text()
-    category_book = ('category',category_book)
+    category_book = (category_book)
 
     
 # Extraction de la balise table afin de récupérer les balises td qui correspondent à chaque éléments nécessaire
@@ -41,20 +43,20 @@ def get_one_book(book) :
 
     
     upc = tds[0]# Code UPC du livre 
-    upc = ('upc : ',upc.string)
+    upc = (upc.string)
             
             
     price_excl_tax = tds[2] # Prix hors taxe du livre 
-    price_excl_tax = ('price_excl_tax',price_excl_tax.string)
+    price_excl_tax = (price_excl_tax.string)
             
     price_incl_tax = tds[3] # Prix avec taxe du livre
-    price_incl_tax = ('price_incl_tax',price_incl_tax.string)
+    price_incl_tax = (price_incl_tax.string)
             
     available = tds[5] # Quantité restant du livre
-    available = ('available',available.string)
+    available = (available.string)
             
     review = tds[6] # Nombre d'étoile du livre
-    review = ('review',review.string)
+    review = (review.string)
     
 
     return title,description,picture,category_book,upc,price_excl_tax,price_incl_tax,available,review
@@ -62,59 +64,81 @@ def get_one_book(book) :
           
       
 
-def save_book(title,description,picture,category_book,upc,price_excl_tax,price_incl_tax,available,review,categories):
+def save_book(title,description,picture,category_book,upc,price_excl_tax,price_incl_tax,available,review,category):
     
     try:
         # Recherche de la catégorie dans la liste complète des catégories
-        for category in categories :
-            
-            category = re.sub(r'[_0-9]', '', category[1])
+            category = re.sub(r'[_0-9]', '', category[0])
             category = category.replace('-',' ')
-            book = category_book[1]
-            book = book.lower()
-            
-            matching_category = category == book
-            
-            if matching_category:
                 
-                category_title = category
-                # Créer un nouveau fichier pour écrire dans le dossier de la catégorie
-                title = title.replace(" ", "_") + '.csv'
+            category_title = category
+            
+            # title = re.sub(r'[_:?/""]', '', title)
+            new_title = re.sub(r'[^\w\s]', '', title)
 
-                file_path = fr'C:\Users\fatim\OneDrive\Bureau\formation 1\Projet_2_Books_Online/categories/{category_title}/{title}.csv'
+            # Raccourcir le titre s'il est trop long
+            if len(new_title) > 70:
+                # Raccourcir le titre et ajouter "..."
+                new_title = new_title[:67] + "..."
+            
+            file_path = fr'./categories/{category_title}/{new_title}.csv'
 
-                # Vérifier si le fichier existe déjà
-                file_exists = os.path.isfile(file_path)
+            # Vérifier si le fichier existe déjà
+            file_exists = os.path.isfile(file_path)
 
-                # Créer un nouveau fichier pour écrire dans le fichier
-                with open(file_path , 'a', newline='') as csv_file:
-                    # Créer un objet writer (écriture) avec ce fichier
-                    writer = csv.writer(csv_file, delimiter=',')
+            # Créer un nouveau fichier pour écrire dans le fichierc
+            with open(file_path , 'w', newline='',encoding='utf-8') as csv_file:
+                # Créer un objet writer (écriture) avec ce fichier
+                writer = csv.writer(csv_file, delimiter=',')
 
-                    # Si le fichier n'existe pas, écrire les en-têtes
-                    if not file_exists:
-                        en_tete = ["title", "description", "picture", "category_book","upc", "price_excl_tax", "price_incl_tax", "available", "review"]
-                        writer.writerow(en_tete)
+                # Si le fichier n'existe pas, écrire les en-têtes
+                if not file_exists:
+                    en_tete = ["title", "description", "picture", "category_book","upc", "price_excl_tax", "price_incl_tax", "available", "review"]
+                    writer.writerow(en_tete)
 
-                    # Créer une nouvelle ligne pour chaque élément
-                    ligne = [title,description,picture,category_book,upc,price_excl_tax,price_incl_tax,available,review]
-                    writer.writerow(ligne)
+                # Créer une nouvelle ligne pour chaque élément
+                ligne = [title,description,picture,category_book,upc,price_excl_tax,price_incl_tax,available,review]
+                writer.writerow(ligne)
                     
     except Exception as error:
         with open('error_log.txt', 'a') as log_file:
             log_file.write(f"An error occurred: {type(error).__name__}\n")
+            print('error save',error)
 
-# # def get_picture (title,picture):
-# #     print(title,picture)
+def get_picture (title,picture,category):
     
-# #     # Ouvre l'URL de l'image et lit son contenu
-# #     with urllib.request.urlopen(picture) as url:
-# #             picture_content = url.read()
+    try :
+        title_category = category[0]
+        title_category = re.sub(r'[_0-9]', '', title_category)
+        category = title_category.replace('-',' ')
+        
+        # title = re.sub(r'[_:?/""]', '', title)
+        new_title = re.sub(r'[^\w\s]', '', title)
 
-# #             # Enregistre le contenu de l'image dans un fichier
-# #             with open(f"{title}.jpg", "wb") as file:
-# #                 picture_url= csv.write(picture_content)
-# #                 file.writer(picture_url)
+        # Raccourcir le titre s'il est trop long
+        if len(new_title) > 70:
+            # Raccourcir le titre et ajouter "..."
+            new_title = new_title[:67] + "..."
+            
+        file_path = fr'./categories/{category}/{new_title}.jpg'
+
+
+        # Vérifier si le fichier existe déjà
+        file_exists = os.path.isfile(file_path)
+        
+        # Ouvre l'URL de l'image et lit son contenu
+        with urllib.request.urlopen(picture) as url:
+                picture = url.read()
+                
+        if not file_exists : 
+                # Enregistre le contenu de l'image dans un fichier
+                with open(file_path, "wb") as file:
+                    file.write(picture)
+            
+    except Exception as error:
+        with open('error_log.txt', 'a') as log_file:
+            log_file.write(f"An error occurred: {type(error).__name__}\n")
+            print('error picture',error)
 
 
         
