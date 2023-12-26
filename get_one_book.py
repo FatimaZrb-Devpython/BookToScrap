@@ -73,7 +73,6 @@ def save_book(title,description,picture,category_book,upc,price_excl_tax,price_i
                 
             category_title = category
             
-            # title = re.sub(r'[_:?/""]', '', title)
             new_title = re.sub(r'[^\w\s]', '', title)
 
             # Raccourcir le titre s'il est trop long
@@ -112,7 +111,6 @@ def get_picture (title,picture,category):
         title_category = re.sub(r'[_0-9]', '', title_category)
         category = title_category.replace('-',' ')
         
-        # title = re.sub(r'[_:?/""]', '', title)
         new_title = re.sub(r'[^\w\s]', '', title)
 
         # Raccourcir le titre s'il est trop long
