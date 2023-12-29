@@ -1,0 +1,12 @@
+# Ignorer le fichier categories.csv
+all_categories.csv
+
+# Ignorer le dossier categories et son contenu
+categories/
+
+# Ignorer le dossier env
+env/
+
+node_modules
+
+__pycache__/
