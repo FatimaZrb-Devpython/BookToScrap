@@ -14,12 +14,12 @@ def get_all_categories(url):
     for a in list:
         a = a.find("a")
         link = a.get("href")
-        url_book = "https://books.toscrape.com/" + link
-        split = url_book.split("/")
+        url_category = "https://books.toscrape.com/" + link
+        split = url_category.split("/")
         title_category = split[6]
         title = re.sub(r"[_0-9]", "", title_category)
         title = title.replace("-", " ")
-        categories.append((title, url_book))
+        categories.append((title, url_category))
 
     return categories
 
